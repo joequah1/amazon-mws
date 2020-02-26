@@ -520,22 +520,19 @@ class MWSClient
 
         $response = $this->request('ListOrders', $query);
 
-        if (isset($response['ListOrdersResult']['Orders']['Order'])) {
+        // @NOTE - customized response - NJ 
+        if (isset($response['ListOrdersResult']['Orders'])) {
             if (isset($response['ListOrdersResult']['NextToken'])) {
-                $data['ListOrders'] = $response['ListOrdersResult']['Orders']['Order'];
                 $data['NextToken'] = $response['ListOrdersResult']['NextToken'];
-
-                return $data;
             }
 
-            $response = $response['ListOrdersResult']['Orders']['Order'];
+            $data['ListOrders'] = isset($response['ListOrdersResult']['Orders']['Order']) ? $response['ListOrdersResult']['Orders']['Order'] : [];
 
-            if (array_keys($response) !== range(0, count($response) - 1)) {
-                return [$response];
+            if (isset($data['ListOrders']['AmazonOrderId'])) {
+                $data['ListOrders'] = [$data['ListOrders']];
             }
 
-            return $response;
-
+            return $data; 
         } else {
             return [];
         }
@@ -723,9 +720,12 @@ class MWSClient
 
         $result = array_values($response['ListOrderItemsResult']['OrderItems']);
 
-        $items = isset($result[0]['QuantityOrdered'])
-            ? $result
-            : $result[0];
+        // @NOTE - customized the return - NJ 
+        // $items = isset($result[0]['QuantityOrdered'])
+        //     ? $result
+        //     : $result[0];
+
+        $items = $result;
 
         $NextToken = isset($response['ListOrderItemsResult']['NextToken'])
             ? $response['ListOrderItemsResult']['NextToken']
@@ -1636,10 +1636,11 @@ class MWSClient
         }
 
         if (!empty($data['items'])) {
-            $fulfillmentData['Item'] = [];
+            $fulfillmentMessage['Item'] = [];
             foreach ($data['items'] as $item) {
-                $fulfillmentData['Item'][] = [
-                    'MerchantOrderItemID' => $item['merchantOrderItemId'],
+                $fulfillmentMessage['Item'][] = [
+                    'AmazonOrderItemCode' => $item['amazonOrderItemCode'],
+                    // 'MerchantOrderItemID' => $item['merchantOrderItemId'],
                     'MerchantFulfillmentItemID' => $item['merchantFullfillmentItemId'],
                     'Quantity' => $item['quantity']
                 ];
@@ -1696,26 +1697,24 @@ class MWSClient
             'MessageID' => rand(),
             'OrderAcknowledgement' => [
                 'AmazonOrderID' => $orderId,
-                'MerchantOrderID' => $data['merchantOrderId'],
+                'MerchantOrderID' => $data['merchantOrderId'] ?? null,
                 'StatusCode' => $data['statusCode'],
                 'Item' => []
             ]
         ];
 
         // if (!empty($data['items'])) {
-        if (($data['statusCode'] == MWSOrder::ACK_STATUS_SUCCESS) && !empty($data['items'])) {
+        if (!empty($data['items'])) {
             $fulfillmentItems = [];
             foreach ($data['items'] as $item) {
                 $temp = [
                     'AmazonOrderItemCode' => $item['merchantFullfillmentItemId'],
-                    'MerchantOrderItemID' => $item['merchantOrderItemId'],
+                    'MerchantOrderItemID' => $item['merchantOrderItemId'] ?? null,
                 ];
 
-                /*
                 if ($data['statusCode'] == MWSOrder::ACK_STATUS_FAILURE) {
                     $temp['CancelReason'] = $item['cancelReason'] ?? MWSOrder::CANCEL_REASON;
                 }
-                */
 
                 $fulfillmentItems[] = $temp;
             }
