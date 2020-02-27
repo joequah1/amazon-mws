@@ -1616,6 +1616,7 @@ class MWSClient
             'MessageID' => rand(),
             'OrderFulfillment' => [
                 'AmazonOrderID' => $orderId,
+                // 'MerchantOrderID' => $orderId,
                 'MerchantFulfillmentID' => $data['merchantFulfillmentId'],
                 'FulfillmentDate' => $data['shippingDate']
             ]
@@ -1635,19 +1636,22 @@ class MWSClient
             $fulfillmentData['ShipperTrackingNumber'] = $data['trackingCode'];
         }
 
+        $fulfillmentMessage['OrderFulfillment']['FulfillmentData'] = $fulfillmentData;
+
         if (!empty($data['items'])) {
-            $fulfillmentMessage['Item'] = [];
+            $fulfillmentMessage['OrderFulfillment']['Item'] = [];
             foreach ($data['items'] as $item) {
-                $fulfillmentMessage['Item'][] = [
+                $fulfillmentMessage['OrderFulfillment']['Item'][] = [
                     'AmazonOrderItemCode' => $item['amazonOrderItemCode'],
-                    // 'MerchantOrderItemID' => $item['merchantOrderItemId'],
+                    // 'MerchantOrderItemID' => $item['amazonOrderItemCode'],
                     'MerchantFulfillmentItemID' => $item['merchantFullfillmentItemId'],
-                    'Quantity' => $item['quantity']
+                    'Quantity' => $item['quantity'],
+                    // 'Transparencycode' => ''
                 ];
             }
         }
 
-        $fulfillmentMessage['OrderFulfillment']['FulfillmentData'] = $fulfillmentData;
+        
 
         return $fulfillmentMessage;
     }
