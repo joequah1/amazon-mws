@@ -1617,7 +1617,7 @@ class MWSClient
             'OrderFulfillment' => [
                 'AmazonOrderID' => $orderId,
                 // 'MerchantOrderID' => $orderId,
-                'MerchantFulfillmentID' => $data['merchantFulfillmentId'],
+                // 'MerchantFulfillmentID' => $data['merchantFulfillmentId'],
                 'FulfillmentDate' => $data['shippingDate']
             ]
         ];
@@ -1644,7 +1644,7 @@ class MWSClient
                 $fulfillmentMessage['OrderFulfillment']['Item'][] = [
                     'AmazonOrderItemCode' => $item['amazonOrderItemCode'],
                     // 'MerchantOrderItemID' => $item['amazonOrderItemCode'],
-                    'MerchantFulfillmentItemID' => $item['merchantFullfillmentItemId'],
+                    // 'MerchantFulfillmentItemID' => $item['merchantFullfillmentItemId'],
                     'Quantity' => $item['quantity'],
                     // 'Transparencycode' => ''
                 ];
