@@ -1701,7 +1701,7 @@ class MWSClient
             'MessageID' => rand(),
             'OrderAcknowledgement' => [
                 'AmazonOrderID' => $orderId,
-                'MerchantOrderID' => $data['merchantOrderId'] ?? null,
+                //'MerchantOrderID' => $data['merchantOrderId'] ?? null,
                 'StatusCode' => $data['statusCode'],
                 'Item' => []
             ]
@@ -1713,7 +1713,7 @@ class MWSClient
             foreach ($data['items'] as $item) {
                 $temp = [
                     'AmazonOrderItemCode' => $item['merchantFullfillmentItemId'],
-                    'MerchantOrderItemID' => $item['merchantOrderItemId'] ?? null,
+                    //'MerchantOrderItemID' => $item['merchantOrderItemId'] ?? null,
                 ];
 
                 if ($data['statusCode'] == MWSOrder::ACK_STATUS_FAILURE) {
