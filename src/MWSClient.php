@@ -45,6 +45,7 @@ class MWSClient
         'A39IBJ37TRP1C6' => 'mws.amazonservices.com.au',
         'A1VC38T7YXB528' => 'mws.amazonservices.jp',
         'AAHKV2X7AFYLW' => 'mws.amazonservices.com.cn',
+        'A19VAU5U5O7RUS' => 'mws-fe.amazonservices.com'
     ];
 
     /* private $MarketplaceCenters = [
@@ -1796,7 +1797,7 @@ class MWSClient
     public function ListFinancialEvents(\DateTime $fromTime)
     {
         $response = $this->request('ListFinancialEvents', [
-            'PostedAfter' => gmdate(self::DATE_FORMAT, $fromTime)
+            'PostedAfter' => gmdate(self::DATE_FORMAT, $fromTime->getTimestamp())
         ]);
 
         $events = isset($response['ListFinancialEventsResult']['FinancialEvents'])
