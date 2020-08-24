@@ -5,6 +5,12 @@
 
 Interaction with the Amazon Api for vendors called MWS
 
+### Update 
+
+```
+composer update matteocacciola/amazon-mws
+```
+
 ### Installation:
 ```bash
 $ composer require matteocacciola/amazon-mws
