@@ -45,7 +45,7 @@ class MWSClient
         'A39IBJ37TRP1C6' => 'mws.amazonservices.com.au',
         'A1VC38T7YXB528' => 'mws.amazonservices.jp',
         'AAHKV2X7AFYLW' => 'mws.amazonservices.com.cn',
-        'A19VAU5U5O7RUS' => 'mws-fe.amazonservices.com'
+        'A19VAU5U5O7RUS' => 'mws-fe.amazonservices.com',
     ];
 
     /* private $MarketplaceCenters = [
@@ -131,10 +131,17 @@ class MWSClient
     public function validateCredentials()
     {
         try {
-            $response = $this->ListOrders(now());
+            // Using ListInventorySupply to check credentials, have higher throttling limit
+            $this->ListInventorySupply([
+                'SellerSkus' => 'test',
+                //'QueryStartDateTime' => now()
+            ]);
+            //$this->ListOrders(now());
             return true;
         } catch (Exception $e) {
-            if ($e->getMessage() == 'Invalid AmazonOrderId: validate' || $e->getMessage() == 'The order id you have requested is not valid.') {
+            if ($e->getMessage() == 'Request is throttled') {
+                throw new Exception('Request is throttled');
+            } else if ($e->getMessage() == 'Invalid AmazonOrderId: validate' || $e->getMessage() == 'The order id you have requested is not valid.') {
                 return true;
             } else {
                 return false;
@@ -1619,7 +1626,7 @@ class MWSClient
             'OrderFulfillment' => [
                 'AmazonOrderID' => $orderId,
                 // 'MerchantOrderID' => $orderId,
-                // 'MerchantFulfillmentID' => $data['merchantFulfillmentId'],
+                //'MerchantFulfillmentID' => $data['merchantFulfillmentId'],
                 'FulfillmentDate' => $data['shippingDate']
             ]
         ];
@@ -1703,7 +1710,7 @@ class MWSClient
             'MessageID' => rand(),
             'OrderAcknowledgement' => [
                 'AmazonOrderID' => $orderId,
-                //'MerchantOrderID' => $data['merchantOrderId'] ?? null,
+                'MerchantOrderID' => $data['merchantOrderId'] ?? null,
                 'StatusCode' => $data['statusCode'],
                 'Item' => []
             ]
@@ -1715,7 +1722,7 @@ class MWSClient
             foreach ($data['items'] as $item) {
                 $temp = [
                     'AmazonOrderItemCode' => $item['merchantFullfillmentItemId'],
-                    //'MerchantOrderItemID' => $item['merchantOrderItemId'] ?? null,
+                    'MerchantOrderItemID' => $item['merchantOrderItemId'] ?? null,
                 ];
 
                 if ($data['statusCode'] == MWSOrder::ACK_STATUS_FAILURE) {
@@ -1798,7 +1805,7 @@ class MWSClient
     public function ListFinancialEvents(\DateTime $fromTime)
     {
         $response = $this->request('ListFinancialEvents', [
-            'PostedAfter' => gmdate(self::DATE_FORMAT, $fromTime->getTimestamp())
+            'PostedAfter' => gmdate(self::DATE_FORMAT, $fromTime)
         ]);
 
         $events = isset($response['ListFinancialEventsResult']['FinancialEvents'])
