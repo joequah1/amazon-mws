@@ -1493,7 +1493,10 @@ class MWSClient
                 $headers = $csv->fetchOne();
                 $result = [];
                 foreach ($csv->setOffset(1)->fetchAll() as $row) {
-                    $result[] = array_combine($headers, $row);
+                    if (count($headers) === count($row)) {
+                        $result[] = array_combine($headers, $row);
+                    }
+
                 }
             }
 
